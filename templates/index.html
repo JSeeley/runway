@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h3 class="mt-5">Welcome! Runway is a tool that calculates when you would run out of money if you did not have income.</h3>
+    <div class="row">
+        <div class="col">
+        </br>
+      </br>
+            <h4>Step 1: Enter your monthly expenses:</h4>
+          </br>
+        </div>
+        <div class="col">
+        </div>
+      </div>
+    
+    <form method="post" action=".">
+        <div class="form-group input-group row">
+            <label for="shelter" class="col-sm-3 col-form-label">Rent/Mortgage:</label>
+            <div class="col-sm-3 input-group input-group-prepend">
+                <div class="input-group-text">$</div>
+              <input name="shelter" class="form-control" id="shelter">
+            </div>
+        </div>
+        <div class="form-group input-group row">
+            <label for="utilities" class="col-sm-3 col-form-label">Utilities</label>
+            <div class="col-sm-3 input-group input-group-prepend">
+                <div class="input-group-text">$</div>
+              <input name="utilities" class="form-control" id="utilities">
+            </div>
+        </div>
+        <div class="form-group input-group row">
+            <label for="food" class="col-sm-3 col-form-label">Food:</label>
+            <div class="col-sm-3 input-group input-group-prepend">
+                <div class="input-group-text">$</div>
+              <input name="food" class="form-control" id="food">
+            </div>
+        </div>
+        <div class="form-group input-group row">
+            <label for="insurance" class="col-sm-3 col-form-label">Insurance:</label>
+            <div class="col-sm-3 input-group input-group-prepend">
+                <div class="input-group-text">$</div>
+              <input name="insurance" class="form-control" id="insurance">
+            </div>
+        </div>
+        <div class="form-group input-group row">
+            <label for="other" class="col-sm-3 col-form-label">All Other Expenses:</label>
+            <div class="col-sm-3 input-group input-group-prepend">
+                <div class="input-group-text">$</div>
+              <input name="other" class="form-control" id="other">
+              <small id="emailHelp" class="form-text text-muted">Entertainment, Subscriptions, Gas, Etc.</small>
+            </div>
+        </div>
+      </br>
+        <!--<p><input type="submit" name="action" value="Add another" /></p>-->
+        <h4>Step 2: Enter your assets:</h4>
+      </br>
+        <div class="form-group input-group row">
+            <label for="cash" class="col-sm-3 col-form-label">Cash:</label>
+            <div class="col-sm-3 input-group input-group-prepend">
+                <div class="input-group-text">$</div>
+              <input name="cash" class="form-control" id="cash">
+            </div>
+        </div>
+        <div class="form-group input-group row">
+            <label for="investments" class="col-sm-3 col-form-label">Value Of Investments:</label>
+            <div class="col-sm-3 input-group input-group-prepend">
+                <div class="input-group-text">$</div>
+              <input name="investments" class="form-control" id="investments">
+              <small id="emailHelp" class="form-text text-muted">NOTE: Do not include 401k and other retirement investments.</small>
+            </div>
+        </div>
+        <div class="form-group input-group row">
+            <label for="assets" class="col-sm-3 col-form-label">Value Of Assets:</label>
+            <div class="col-sm-3 input-group input-group-prepend">
+                <div class="input-group-text">$</div>
+              <input name="assets" class="form-control" id="assets">
+              <small id="emailHelp" class="form-text text-muted">House, car, land, computer, gold, etc.</small>
+            </div>
+        </div>
+      </br>
+        <h4>Step 3: Enter your debt:</h4>
+      </br>
+        <div class="form-group input-group row">
+            <label for="credit" class="col-sm-3 col-form-label">0% Interest Debt:</label>
+            <div class="col-sm-3 input-group input-group-prepend">
+                <div class="input-group-text">$</div>
+              <input name="credit" class="form-control" id="credit">
+              <small id="emailHelp" class="form-text text-muted">For Example: A credit card you'll pay off next month.</small>
+            </div>
+        </div>
+        <div class="form-group input-group row">
+          <label for="low-interest" class="col-sm-3 col-form-label">.1 to 5% interest debt:</label>
+          <div class="col-sm-3 input-group input-group-prepend">
+              <div class="input-group-text">$</div>
+            <input name="low-interest" class="form-control" id="low-interest">
+          </div>
+        </div>
+        <div class="form-group input-group row">
+          <label for="high-interest" class="col-sm-3 col-form-label">5%+ Interest Debt:</label>
+          <div class="col-sm-3 input-group input-group-prepend">
+              <div class="input-group-text">$</div>
+            <input name="high-interest" class="form-control" id="high-interest">
+          </div>
+        </div>
+      </br>
+        <h1><input type="submit" name="action" value="Calculate Runway" /></h1>
+    </form>
+</div>
+
+{% endblock %}

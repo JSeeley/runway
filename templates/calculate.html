@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{% endblock %}
+
+{% block body %}
+<div class="container">
+</br>
+    <p>Your Total Monthly Expenses: ${{ total_expenses }} </p>
+    <p>Your Total Assets: ${{ total_assets }} </p>
+    <p>Your Total Debt: ${{ total_debt }} </p>
+</br>
+    <h4>{{ runway_text }}</h4>
+    <p><a href="/">Click here to calculate again</a> 
+    
+</div>   
+{% endblock %}
