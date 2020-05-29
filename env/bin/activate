@@ -37,7 +37,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="/Users/justinseeley/Programming/python-docs-samples/appengine/standard_python37/hello_world/env"
+VIRTUAL_ENV="/Users/justinseeley/Programming/runwaytest/env"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
