@@ -2,57 +2,123 @@ from flask import Flask, request, render_template
 from calculation import calculate_runway
 
 # TO-DO:
-# BOOM BABY! DONE 1.) Accept the form values as a dictionary. 
-# DONE. 2.) Prompt the user for asset values and save as a dictionary.
-# DONE 3.) Write a function that takes in an expense dictionary and an asset dictionary and calculates basic runway.
-# 4.) Print out full dictionary with the runway answer.
-# 5.) Provide the user with an alternative runway if their investments grew at 7%
-# 6.) Allow the user to edit their values and re-calculate their runway.
-# 7.) Make it pretty
-# 8.) Add entertainment expense and "boring life" runway option
+# Have the dictionary be saved to a database
+#   - Need to finish michigan courses first.
+#   - Connecting SQLAlchemy and Cloud SQL: https://docs.sqlalchemy.org/en/13/dialects/mysql.html#module-sqlalchemy.dialects.mysql.mysqldb
+# Add an authentication layer and the ability to save values to a user
+#   - Checkout Flask-Login (https://www.digitalocean.com/community/tutorials/how-to-add-authentication-to-your-app-with-flask-login)
+#   - Checout SQLAlchemy
+#   - Flask-Bootstrap + WTF Forms (https://www.youtube.com/watch?v=S7ZLiUabaEo)
+#   - All of the above wrapped into one (https://www.youtube.com/watch?v=8aTnmsDMldY)
+#   - To-Do list app: https://www.youtube.com/watch?v=4kD-GRF5VPs&pbjreload=101
+#   - FULL BLOG APP on CLOUDSQL and has login/auth: https://medium.com/@zainqasmi/build-and-deploy-a-python-flask-application-on-google-cloud-using-app-engine-and-cloud-sql-a3c5bde5ef4a
+# Allow the user to edit their values and re-calculate their runway
+# Give a wider range of suggestions 
+# Make it pretty
+# Share it with people
+# Add entertainment expense and "boring life" runway option
+
+
+# LEARNING TO-DO:
+# Finish michigan course on web data
+
 # Original starter code from: https://blog.pythonanywhere.com/169/
 # Look into wtforms for forms? Does this replace "request" from Flask? Need to understand this difference more.
 
+import os
+
+from flask import Flask
+import pymysql
+
+db_user = os.environ.get('CLOUD_SQL_USERNAME')
+db_password = os.environ.get('CLOUD_SQL_PASSWORD')
+db_name = os.environ.get('CLOUD_SQL_DATABASE_NAME')
+db_connection_name = os.environ.get('CLOUD_SQL_CONNECTION_NAME')
+
 app = Flask(__name__)
-app.config["DEBUG"] = True
 
-expenses = dict()
-assets = dict()
-debt = dict()
 
-@app.route('/', methods=["GET", "POST"])
+@app.route('/')
 def main():
-    if request.method == "POST":
-        expenses.clear()
-        expenses['shelter'] = float(request.form["shelter"])
-        expenses['utilities'] = float(request.form["utilities"])
-        expenses['food'] = float(request.form["food"])
-        expenses['insurance'] = float(request.form["insurance"])
-        expenses['other'] = float(request.form["other"])
-        assets['cash'] = float(request.form["cash"])
-        assets['investments'] = float(request.form["investments"])
-        assets['assets'] = float(request.form["assets"])
-        debt['credit'] = float(request.form["credit"])
-        debt['low-interest'] = float(request.form["low-interest"])
-        debt['high-interest'] = float(request.form["high-interest"])
+    # When deployed to App Engine, the `GAE_ENV` environment variable will be
+    # set to `standard`
+    if os.environ.get('GAE_ENV') == 'standard':
+        # If deployed, use the local socket interface for accessing Cloud SQL
+        unix_socket = '/cloudsql/{}'.format(db_connection_name)
+        cnx = pymysql.connect(user=db_user, password=db_password,
+                              unix_socket=unix_socket, db=db_name)
+    else:
+        # If running locally, use the TCP connections instead
+        # Set up Cloud SQL Proxy (cloud.google.com/sql/docs/mysql/sql-proxy)
+        # so that your application can use 127.0.0.1:3306 to connect to your
+        # Cloud SQL instance
+        host = '127.0.0.1'
+        cnx = pymysql.connect(user=db_user, password=db_password,
+                              host=host, db=db_name)
 
-        if request.form["action"] == "Calculate Runway":
-            total_expenses = sum(expenses.values())
-            total_assets = sum(assets.values())
-            total_debt = sum(debt.values())     
-            runway_text = calculate_runway(expenses, assets, debt)
-            return render_template("calculate.html", total_expenses=total_expenses, total_assets=total_assets, runway_text=runway_text, total_debt=total_debt)
+    with cnx.cursor() as cursor:
+        cursor.execute('select user_txt from users_tbl;')
+        result = cursor.fetchall()
+        current_msg = result[0][0]
+    cnx.close()
 
+    return str(current_msg)
+# [END gae_python37_cloudsql_mysql]
 
-    return render_template("index.html")
-
-
-@app.route('/about', methods=["GET", "POST"])
-
-def about():
-    output = "hello"
-
-    return render_template("index.html", output=output)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='127.0.0.1', port=8080, debug=True)
+
+
+
+# db_user = os.environ.get('CLOUD_SQL_USERNAME')
+# db_password = os.environ.get('CLOUD_SQL_PASSWORD')
+# db_name = os.environ.get('CLOUD_SQL_DATABASE_NAME')
+# db_connection_name = os.environ.get('CLOUD_SQL_CONNECTION_NAME')
+
+# app = Flask(__name__)
+# app.config["DEBUG"] = True
+
+
+
+
+# expenses = dict()
+# assets = dict()
+# debt = dict()
+
+# @app.route('/', methods=["GET", "POST"])
+# def main():
+#     if request.method == "POST":
+#         expenses.clear()
+#         expenses['shelter'] = float(request.form["shelter"])
+#         expenses['utilities'] = float(request.form["utilities"])
+#         expenses['food'] = float(request.form["food"])
+#         expenses['insurance'] = float(request.form["insurance"])
+#         expenses['other'] = float(request.form["other"])
+#         assets['cash'] = float(request.form["cash"])
+#         assets['investments'] = float(request.form["investments"])
+#         assets['assets'] = float(request.form["assets"])
+#         debt['credit'] = float(request.form["credit"])
+#         debt['low-interest'] = float(request.form["low-interest"])
+#         debt['high-interest'] = float(request.form["high-interest"])
+
+#         if request.form["action"] == "Calculate Runway":
+#             total_expenses = sum(expenses.values())
+#             total_assets = sum(assets.values())
+#             total_debt = sum(debt.values())     
+#             runway_text = calculate_runway(expenses, assets, debt)
+#             return render_template("calculate.html", total_expenses=total_expenses, total_assets=total_assets, runway_text=runway_text, total_debt=total_debt)
+
+
+#     return render_template("index.html")
+
+
+# @app.route('/about', methods=["GET", "POST"])
+
+# def about():
+#     output = "hello"
+
+#     return render_template("index.html", output=output)
+
+# if __name__ == '__main__':
+#     app.run(debug=True)

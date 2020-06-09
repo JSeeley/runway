@@ -1,1 +1,7 @@
 runtime: python37
+
+env_variables:
+  CLOUD_SQL_USERNAME: justseels
+  CLOUD_SQL_PASSWORD: qweedle2
+  CLOUD_SQL_DATABASE_NAME: users
+  CLOUD_SQL_CONNECTION_NAME: personal-runway:us-west1:runway
