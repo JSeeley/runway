@@ -25,100 +25,51 @@ from calculation import calculate_runway
 # Original starter code from: https://blog.pythonanywhere.com/169/
 # Look into wtforms for forms? Does this replace "request" from Flask? Need to understand this difference more.
 
-import os
-
-from flask import Flask
-import pymysql
-
-db_user = os.environ.get('CLOUD_SQL_USERNAME')
-db_password = os.environ.get('CLOUD_SQL_PASSWORD')
-db_name = os.environ.get('CLOUD_SQL_DATABASE_NAME')
-db_connection_name = os.environ.get('CLOUD_SQL_CONNECTION_NAME')
-
-app = Flask(__name__)
-
-
-@app.route('/')
-def main():
-    # When deployed to App Engine, the `GAE_ENV` environment variable will be
-    # set to `standard`
-    if os.environ.get('GAE_ENV') == 'standard':
-        # If deployed, use the local socket interface for accessing Cloud SQL
-        unix_socket = '/cloudsql/{}'.format(db_connection_name)
-        cnx = pymysql.connect(user=db_user, password=db_password,
-                              unix_socket=unix_socket, db=db_name)
-    else:
-        # If running locally, use the TCP connections instead
-        # Set up Cloud SQL Proxy (cloud.google.com/sql/docs/mysql/sql-proxy)
-        # so that your application can use 127.0.0.1:3306 to connect to your
-        # Cloud SQL instance
-        host = '127.0.0.1'
-        cnx = pymysql.connect(user=db_user, password=db_password,
-                              host=host, db=db_name)
-
-    with cnx.cursor() as cursor:
-        cursor.execute('select user_txt from users_tbl;')
-        result = cursor.fetchall()
-        current_msg = result[0][0]
-    cnx.close()
-
-    return str(current_msg)
-# [END gae_python37_cloudsql_mysql]
-
-
-if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=8080, debug=True)
-
-
-
 # db_user = os.environ.get('CLOUD_SQL_USERNAME')
 # db_password = os.environ.get('CLOUD_SQL_PASSWORD')
 # db_name = os.environ.get('CLOUD_SQL_DATABASE_NAME')
 # db_connection_name = os.environ.get('CLOUD_SQL_CONNECTION_NAME')
 
-# app = Flask(__name__)
-# app.config["DEBUG"] = True
+app = Flask(__name__)
+app.config["DEBUG"] = True
+
+expenses = dict()
+assets = dict()
+debt = dict()
+
+@app.route('/', methods=["GET", "POST"])
+def main():
+    if request.method == "POST":
+        expenses.clear()
+        expenses['shelter'] = float(request.form["shelter"])
+        expenses['utilities'] = float(request.form["utilities"])
+        expenses['food'] = float(request.form["food"])
+        expenses['insurance'] = float(request.form["insurance"])
+        expenses['other'] = float(request.form["other"])
+        assets['cash'] = float(request.form["cash"])
+        assets['investments'] = float(request.form["investments"])
+        assets['assets'] = float(request.form["assets"])
+        debt['credit'] = float(request.form["credit"])
+        debt['low-interest'] = float(request.form["low-interest"])
+        debt['high-interest'] = float(request.form["high-interest"])
+
+        if request.form["action"] == "Calculate Runway":
+            total_expenses = sum(expenses.values())
+            total_assets = sum(assets.values())
+            total_debt = sum(debt.values())     
+            runway_text = calculate_runway(expenses, assets, debt)
+            return render_template("calculate.html", total_expenses=total_expenses, total_assets=total_assets, runway_text=runway_text, total_debt=total_debt)
 
 
+    return render_template("index.html")
 
 
-# expenses = dict()
-# assets = dict()
-# debt = dict()
+@app.route('/about', methods=["GET", "POST"])
 
-# @app.route('/', methods=["GET", "POST"])
-# def main():
-#     if request.method == "POST":
-#         expenses.clear()
-#         expenses['shelter'] = float(request.form["shelter"])
-#         expenses['utilities'] = float(request.form["utilities"])
-#         expenses['food'] = float(request.form["food"])
-#         expenses['insurance'] = float(request.form["insurance"])
-#         expenses['other'] = float(request.form["other"])
-#         assets['cash'] = float(request.form["cash"])
-#         assets['investments'] = float(request.form["investments"])
-#         assets['assets'] = float(request.form["assets"])
-#         debt['credit'] = float(request.form["credit"])
-#         debt['low-interest'] = float(request.form["low-interest"])
-#         debt['high-interest'] = float(request.form["high-interest"])
+def about():
+    output = "hello"
 
-#         if request.form["action"] == "Calculate Runway":
-#             total_expenses = sum(expenses.values())
-#             total_assets = sum(assets.values())
-#             total_debt = sum(debt.values())     
-#             runway_text = calculate_runway(expenses, assets, debt)
-#             return render_template("calculate.html", total_expenses=total_expenses, total_assets=total_assets, runway_text=runway_text, total_debt=total_debt)
+    return render_template("index.html", output=output)
 
-
-#     return render_template("index.html")
-
-
-# @app.route('/about', methods=["GET", "POST"])
-
-# def about():
-#     output = "hello"
-
-#     return render_template("index.html", output=output)
-
-# if __name__ == '__main__':
-#     app.run(debug=True)
+if __name__ == '__main__':
+    app.run(debug=True)
