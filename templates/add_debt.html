@@ -1,0 +1,18 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+  <h1>Add Debt</h1>
+  {% from "includes/_formhelpers.html" import render_field %}
+  <form method="POST" action="">
+    <div class="input-group">
+      {{ render_field(form.no_interest, class_="form-control input-group") }}
+    </div>
+    <div class="input-group">
+      {{ render_field(form.low_interest, class_="form-control input-group") }}
+    </div>
+    <div class="input-group">
+      {{ render_field(form.high_interest, class_="form-control input-group") }}
+    </div>
+    <p><input class="btn btn-primary" type="submit" value="Submit">
+  </form>
+{% endblock %}
