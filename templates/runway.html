@@ -3,23 +3,37 @@
 {% block body %}
   <h1>Your Runway <small> Welcome {{session.email}}</small></h1>
   <hr>
+  </br>
+  <h3>You could make it {{runway_calc[4]}} months without income.</h3>
+  </br>
   <table class="table table-striped">
     <tr>
-      <th>Title</th>
-      <th>Type</th>
-      <th>Amount</th>
-      <th>Percentage</th>
       <th></th>
-      <th></th>
+      <th>Total</th>
     </tr>
-    {% for item in runway %}
       <tr>
-        <td>{{item.name}}</td>
-        <td>{{item.type}}</td>
-        <td>{{item.amount}}</td>
-        <td>{{item.percentage}}</td>
-        <!-- <td><a href="edit_item{{item.id}}" class="btn btn-default pull-right">Edit</a></td> -->
+        <td>Expenses</td>
+        <td>{{runway_calc[0]}}</td>
       </tr>
-    {% endfor %}
+      <tr>
+        <td>Assets</td>
+        <td>{{runway_calc[1]}}</td>
+      </tr>
+      <tr>
+        <td>Debt</td>
+        <td>{{runway_calc[2]}}</td>
+      </tr>
+      <tr>
+        <td>Income</td>
+        <td>{{runway_calc[3]}}</td>
+      </tr>
   </table>
+  </br>
+  <h2>Goal #2: Super Emergency Fund</h2>
+  <p>If you have an emergency like losing your job or an unexpected medical bill, it would be good to have some cash saved up.</p>
+  <h3>{{runway_calc[5]}}</h3>
+  </br>
+  <h2>Goal #4: Six Month Emergency Fund</h2>
+  <p>If you have a longer term emergency, it would be good to have some cash saved up so you have time to find a new job you love.</p>
+  <h3>{{runway_calc[6]}}</h3>
 {% endblock %}

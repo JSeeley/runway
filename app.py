@@ -3,6 +3,7 @@ import mysql.connector
 from wtforms import Form, StringField, IntegerField, PasswordField, validators
 from passlib.hash import sha256_crypt
 from functools import wraps
+import calculate
 
 app = Flask(__name__)
 
@@ -126,18 +127,29 @@ def logout():
 @app.route('/runway')
 @is_logged_in
 def runway():
+        
     # Create cursor
-    cur = cnx.cursor(dictionary=True)
+    cur = cnx.cursor()
 
+    # Ugly query to turn the users email into email_id so it can be used in the insert function. REALLY needs refactor.
+    user_list = [session['email']]
+    user = user_list[0]
+    cur.execute("SELECT email_id FROM email WHERE email=%s", [user])
+    user_email_dict = str(cur.fetchall())
+    user_email = ''.join(i for i in user_email_dict if i.isdigit())
 
-    # Show runway only from the user logged in 
-    cur.execute("SELECT * FROM items JOIN email ON email.email_id = items.email_id JOIN item_name ON items.item_name_id = item_name.item_name_id JOIN item_type ON items.item_type_id = item_type.item_type_id WHERE email = %s", [session['email']])
+    # Show runway only from the user logged in
+    cur.execute("SELECT item_type_id, item_name_id, amount FROM items WHERE email_id=%s", [user_email])
+
+    # Query for grabbing every item a user has ever input 
+    # cur.execute("SELECT * FROM items JOIN email ON email.email_id = items.email_id JOIN item_name ON items.item_name_id = item_name.item_name_id JOIN item_type ON items.item_type_id = item_type.item_type_id WHERE email = %s", [session['email']])
 
     # Get runway if the user has one or send them to the build runway landing page
-    runway = cur.fetchall() 
+    items = cur.fetchall()
 
-    if runway != []:
-        return render_template('runway.html', runway=runway)
+    if items != []:
+        runway_calc = calculate.runway_length(items)
+        return render_template('runway.html', runway_calc=runway_calc)
     else:
         return render_template('build_runway.html')
     # Close connection
@@ -147,8 +159,9 @@ def runway():
 class ExpensesForm(Form):
     rent = IntegerField('Rent', [validators.NumberRange(min=0, max=99999999999)])
     utilities = IntegerField('Utilities', [validators.NumberRange(min=0, max=99999999999)])
-    food = IntegerField('Food', [validators.NumberRange(min=0, max=99999999999)])
-    insurance = IntegerField('Insurance', [validators.NumberRange(min=0, max=99999999999)])
+    food = IntegerField('Food and Toiletries', [validators.NumberRange(min=0, max=99999999999)])
+    income_expenses = IntegerField('Income Earning Expenses', [validators.NumberRange(min=0, max=99999999999)])
+    insurance = IntegerField('Insurance and Healthcare', [validators.NumberRange(min=0, max=99999999999)])
     other = IntegerField('All Other Expenses', [validators.NumberRange(min=0, max=99999999999)])
 
 # Add Expenses
@@ -160,6 +173,7 @@ def add_expenses():
         rent = form.rent.data
         utilities = form.utilities.data
         food = form.food.data
+        income_expenses = form.income_expenses.data
         insurance = form.insurance.data
         other = form.other.data
 
@@ -181,6 +195,7 @@ def add_expenses():
         cur.execute("INSERT INTO items(email_id, item_name_id, item_type_id, amount, percentage) VALUES( %s, %s, %s, %s, %s)", (user_email, 1, item_type_id, rent, 0))
         cur.execute("INSERT INTO items(email_id, item_name_id, item_type_id, amount, percentage) VALUES( %s, %s, %s, %s, %s)", (user_email, 2, item_type_id, utilities, 0))
         cur.execute("INSERT INTO items(email_id, item_name_id, item_type_id, amount, percentage) VALUES( %s, %s, %s, %s, %s)", (user_email, 3, item_type_id, food, 0))
+        cur.execute("INSERT INTO items(email_id, item_name_id, item_type_id, amount, percentage) VALUES( %s, %s, %s, %s, %s)", (user_email, 12, item_type_id, income_expenses, 0))
         cur.execute("INSERT INTO items(email_id, item_name_id, item_type_id, amount, percentage) VALUES( %s, %s, %s, %s, %s)", (user_email, 4, item_type_id, insurance, 0))
         cur.execute("INSERT INTO items(email_id, item_name_id, item_type_id, amount, percentage) VALUES( %s, %s, %s, %s, %s)", (user_email, 5, item_type_id, other, 0))
         
@@ -227,9 +242,9 @@ def add_assets():
         
 
         # Insert form values into DB
-        cur.execute("INSERT INTO items(email_id, item_name_id, item_type_id, amount, percentage) VALUES( %s, %s, %s, %s, %s)", (user_email, 1, item_type_id, cash, 0))
-        cur.execute("INSERT INTO items(email_id, item_name_id, item_type_id, amount, percentage) VALUES( %s, %s, %s, %s, %s)", (user_email, 2, item_type_id, investments, 0))
-        cur.execute("INSERT INTO items(email_id, item_name_id, item_type_id, amount, percentage) VALUES( %s, %s, %s, %s, %s)", (user_email, 3, item_type_id, assets, 0))
+        cur.execute("INSERT INTO items(email_id, item_name_id, item_type_id, amount, percentage) VALUES( %s, %s, %s, %s, %s)", (user_email, 6, item_type_id, cash, 0))
+        cur.execute("INSERT INTO items(email_id, item_name_id, item_type_id, amount, percentage) VALUES( %s, %s, %s, %s, %s)", (user_email, 7, item_type_id, investments, 0))
+        cur.execute("INSERT INTO items(email_id, item_name_id, item_type_id, amount, percentage) VALUES( %s, %s, %s, %s, %s)", (user_email, 8, item_type_id, assets, 0))
         
         # Commit to DB
         cnx.commit()
@@ -274,9 +289,9 @@ def add_debt():
         
 
         # Insert form values into DB
-        cur.execute("INSERT INTO items(email_id, item_name_id, item_type_id, amount, percentage) VALUES( %s, %s, %s, %s, %s)", (user_email, 1, item_type_id, no_interest, 0))
-        cur.execute("INSERT INTO items(email_id, item_name_id, item_type_id, amount, percentage) VALUES( %s, %s, %s, %s, %s)", (user_email, 2, item_type_id, low_interest, 0))
-        cur.execute("INSERT INTO items(email_id, item_name_id, item_type_id, amount, percentage) VALUES( %s, %s, %s, %s, %s)", (user_email, 3, item_type_id, high_interest, 0))
+        cur.execute("INSERT INTO items(email_id, item_name_id, item_type_id, amount, percentage) VALUES( %s, %s, %s, %s, %s)", (user_email, 9, item_type_id, no_interest, 0))
+        cur.execute("INSERT INTO items(email_id, item_name_id, item_type_id, amount, percentage) VALUES( %s, %s, %s, %s, %s)", (user_email, 10, item_type_id, low_interest, 0))
+        cur.execute("INSERT INTO items(email_id, item_name_id, item_type_id, amount, percentage) VALUES( %s, %s, %s, %s, %s)", (user_email, 11, item_type_id, high_interest, 0))
         
         # Commit to DB
         cnx.commit()
