@@ -147,9 +147,13 @@ def runway():
     # Get runway if the user has one or send them to the build runway landing page
     items = cur.fetchall()
 
+    cur.execute("SELECT * FROM to_do WHERE email_id=%s", [user_email])
+
+    to_do = cur.fetchall()
+
     if items != []:
         runway_calc = calculate.runway_length(items)
-        return render_template('runway.html', runway_calc=runway_calc)
+        return render_template('runway.html', runway_calc=runway_calc, to_do=to_do)
     else:
         return render_template('build_runway.html')
     # Close connection

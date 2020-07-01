@@ -3,7 +3,18 @@
 {% block body %}
   <h1>Your Runway <small> Welcome {{session.email}}</small></h1>
   <hr>
+  <p>{{runway_calc}}</p></br>
+    <p>{{to_do}}</p>
   </br>
+  {% for todo in to_do %}
+  <h1>{{to_do.to_do_name}}</h1>
+  {% endfor %}
+  {% for thing in runway_calc %}
+  <h1>{{runway_calc.id}}</h1>
+  <p>{{runway_calc.item_id}}</p>
+  <p>{{runway_calc.item_amount}}</p>
+  <p>{{runway_calc.item_item_type_id}}</p>
+  {% endfor %}
   <h3>You could make it {{runway_calc[4]}} months without income.</h3>
   </br>
   <table class="table table-striped">
